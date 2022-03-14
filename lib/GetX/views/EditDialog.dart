@@ -135,19 +135,13 @@ class EditItemTextField extends StatelessWidget {
                     Get.back();
                     print('done');
                     myInfo.updateItemList();
-                    Get.snackbar(
-                      "تم تعديل الصنف",
-                      'بنجاح',
-                      backgroundColor: Colors.blue[100],
-                    );
+                    TextToast.show("تم تعديل ${ItemNameCtrl.text}",
+                        bgc: Colors.green, duration: 3);
+
                     // await dbCont.read_all_item_table();
                   } catch (e) {
-                    Get.snackbar(
-                      "title",
-                      '$e',
-                      backgroundColor: Colors.blue[100],
-                      duration: const Duration(seconds: 5),
-                    );
+                    TextToast.show("فشل  ${ItemNameCtrl.text}/n راجع البيانات",
+                        bgc: Colors.red, duration: 1);
                   }
                 },
                 child: Text(

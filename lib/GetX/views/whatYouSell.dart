@@ -140,7 +140,7 @@ class SmallItemCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'الباقي : ${data[ItemFiled.StockNum]}',
+                'في المخزن : ${data[ItemFiled.StockNum]}',
                 style: ArabicStyle(fontSize: 20),
               ),
               Text(

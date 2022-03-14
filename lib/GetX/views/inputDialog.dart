@@ -124,19 +124,13 @@ class InputItemTextField extends StatelessWidget {
                   Get.back();
                   myInfo.updateItemList();
                   print('done');
-                  Get.snackbar(
-                    "تم اضافة الصنف",
-                    'بنجاح',
-                    backgroundColor: Colors.blue[100],
-                  );
+                  TextToast.show("تم اضافة ${ItemNameCtrl.text}",
+                      bgc: Colors.green, duration: 3);
+
                   // myInfo.updateItemList();
                 } catch (e) {
-                  Get.snackbar(
-                    "title",
-                    '$e',
-                    backgroundColor: Colors.blue[100],
-                    duration: const Duration(seconds: 5),
-                  );
+                  TextToast.show("فشل  ${ItemNameCtrl.text}/n راجع البيانات",
+                      bgc: Colors.red, duration: 1);
                 }
               },
               child: Text(
@@ -439,81 +433,5 @@ class InputShopScreen extends StatelessWidget {
             ),
           ),
         ]));
-  }
-}
-
-class TextToast {
-  static show(String content,
-      {int duration = 1,
-      Color bgc = const Color.fromARGB(255, 112, 109, 109)}) {
-    Fluttertoast.showToast(
-      msg: content,
-      timeInSecForIosWeb: duration,
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM_LEFT,
-      backgroundColor: bgc,
-      textColor: Colors.white,
-      fontSize: 20.0,
-    );
-  }
-}
-
-class LoadingToast {
-  static LoadingToast instance = LoadingToast._internal();
-  factory LoadingToast() => instance;
-  LoadingToast._internal();
-
-  BuildContext context = Get.overlayContext!;
-  bool needToRemove = true;
-  late OverlayEntry overlayEntry;
-
-  void show({String message = "", double seconds = 3}) {
-    overlayEntry = OverlayEntry(builder: (context) {
-      return Material(
-        color: Color.fromARGB(207, 236, 228, 228),
-        child: Center(
-          child: Container(
-            width: Get.width * 0.3,
-            height: Get.width * 0.3,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: Color.fromARGB(255, 172, 165, 165).withOpacity(0.3),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(8),
-              child: Column(
-                mainAxisAlignment: message == ""
-                    ? MainAxisAlignment.center
-                    : MainAxisAlignment.spaceAround,
-                children: [
-                  CircularProgressIndicator(strokeWidth: 3),
-                  _buildText(message),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    });
-
-    Overlay.of(Get.overlayContext!)?.insert(overlayEntry);
-    needToRemove = true;
-    final millisecond = (seconds * 1000).toInt();
-    Future.delayed(Duration(milliseconds: millisecond)).then((value) {
-      if (needToRemove) {
-        overlayEntry.remove();
-      }
-    });
-  }
-
-  static Widget _buildText(String message) {
-    return message == ""
-        ? SizedBox()
-        : Text(
-            message,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: ArabicStyle(fontSize: 17, color: Colors.white),
-          );
   }
 }

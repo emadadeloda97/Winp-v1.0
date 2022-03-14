@@ -214,7 +214,7 @@ class ItemList_ShopList_Card extends StatelessWidget {
                   Column(
                     children: [
                       Text(
-                        "الباقي : ",
+                        " في المكان : ",
                         style: ArabicStyle(),
                       ),
                       Text('${data['Remind']}', style: ArabicStyle())

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:oda_tables/GetX/views/EditDialog.dart';
 import 'package:oda_tables/GetX/models/database_entity.dart';
 import 'package:oda_tables/GetX/views/comp.dart';
+import 'package:oda_tables/GetX/views/removeDialog.dart';
 import '../controller/Controllers.dart';
 import 'inputDialog.dart';
 import 'moreInfoScreen.dart';
@@ -86,6 +87,7 @@ class SellPlaces extends StatelessWidget {
                 ),
                 onPressed: () async {
                   print(myInfo.ShopsNames);
+                  RemoveShopDialog(myInfo.ShopsNames);
                 },
               ),
               TextButton.icon(
@@ -144,8 +146,9 @@ class SmallShopCard extends StatelessWidget {
               ElevatedButton(
                   onPressed: () async {
                     var list = await DBShopItemsList.readByShop(shopName);
-                    var newData = await DBShopItemsList.readShopItemList(
-                        "${list.first['ShopName']}");
+                    var newData =
+                        await DBShopItemsList.joinShopItemListSellPrice(
+                            "${list.first['ShopName']}");
 
                     // for (var item in list) {
                     //   print(item['ItemName']);
@@ -162,8 +165,9 @@ class SmallShopCard extends StatelessWidget {
               ElevatedButton(
                   onPressed: () async {
                     var list = await DBShopItemsList.readByShop(shopName);
-                    var newData = await DBShopItemsList.readShopItemList(
-                        "${list.first['ShopName']}");
+                    var newData =
+                        await DBShopItemsList.joinShopItemListSellPrice(
+                            "${list.first['ShopName']}");
                     myInfo.resetSeeMaksab();
 
                     Get.to(() => MoreInfoShopItemList(
@@ -186,10 +190,3 @@ class SmallShopCard extends StatelessWidget {
 ///
 ///
 
-List<String> getItemName({List? fromList}) {
-  List<String> l = [];
-  for (var item in fromList!) {
-    l.add(item["ItemName"]);
-  }
-  return l;
-}

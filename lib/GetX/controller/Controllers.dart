@@ -10,7 +10,7 @@ import '../views/comp.dart';
 
 class MyInfo extends GetxController {
   RxInt now = DateTime.now().hour.obs;
-  bool get isDark => now.value < 15 ? true : false;
+  bool get isDark => now.value > 15 ? true : false;
 
   RxList<dynamic> ItemList = [].obs;
   RxList ShopsNames = [].obs;
@@ -85,6 +85,17 @@ class MyInfo extends GetxController {
     isLoding.value = true;
   }
   /////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////
+
+  //////////////////////////////////////////////////////////////
+  ///////////////////remove dialog shop item check box ///////////////////////
+  RxBool removeDialogShopItemCheckBoxValue = true.obs;
+  void updateRemoveDialogShopItemCheckBoxValue() {
+    removeDialogShopItemCheckBoxValue.value =
+        !removeDialogShopItemCheckBoxValue.value;
+  }
+  //////////////////////////////////////////////////////////
+
 //   // @override
 //   // void onInit() async {
 //   //   super.onInit();

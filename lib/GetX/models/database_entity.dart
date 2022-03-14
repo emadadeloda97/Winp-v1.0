@@ -129,7 +129,7 @@ class DBItem {
     try {
       await db.delete(ItemFiled.TableName,
           where: '${ItemFiled.ItemName} = ?', whereArgs: [itemNameToDelete]);
-      await DBShopItemsList.deleteRow(itemNameToDelete: itemNameToDelete);
+      await DBShopItemsList.deleteItem(itemNameToDelete: itemNameToDelete);
       return 1;
     } catch (e) {
       throw Exception(e);
@@ -475,7 +475,7 @@ class DBShopItemsList {
     return map;
   }
 
-  static readShopItemList(String item) async {
+  static joinShopItemListSellPrice(String shop) async {
     final db = await DatabaseHelper.instace.databese;
     var lll = [];
 
@@ -487,7 +487,7 @@ INNER JOIN ${ItemFiled.TableName}
 ON ${ShopItemsListFiled.TableName}.${ShopItemsListFiled.ItemName} = ${ItemFiled.TableName}.${ItemFiled.ItemName} ;
 ''');
     for (var ll in l) {
-      if (ll[ShopItemsListFiled.ShopName] == item) {
+      if (ll[ShopItemsListFiled.ShopName] == shop) {
         lll.add(ll);
       }
     }
@@ -578,35 +578,48 @@ ON ${ShopItemsListFiled.TableName}.${ShopItemsListFiled.ItemName} = ${ItemFiled.
     }
   }
 
-  static Future<int> deleteAndMoveToStock(String itemName) async {
+  static Future<int> deleteAndMoveToStock(
+      {required String itemName, required String itemShop}) async {
     Map oldData = await DBShopItemsList.read(itemName);
-    int oldRemind = oldData[ShopItemsListFiled.Remind];
+    int itemRemind = oldData[ShopItemsListFiled.Remind];
     try {
-      if (oldRemind == 0) {
-        await DBShopItemsList.deleteRow(itemNameToDelete: itemName);
+      if (itemRemind == 0) {
+        await DBShopItemsList.deleteItem(itemNameToDelete: itemName);
         return 1;
       } else {
         Map OldItemData = await DBItem.read(itemName);
         int OldItemStock = OldItemData[ItemFiled.StockNum];
-        await DBItem.update({ItemFiled.StockNum: OldItemStock + oldRemind},
+        await DBItem.update({ItemFiled.StockNum: OldItemStock + itemRemind},
             itemName: itemName);
-        await DBShopItemsList.deleteRow(itemNameToDelete: itemName);
+        await DBShopItemsList.deleteItem(itemNameToDelete: itemName);
         return 1;
       }
     } catch (e) {
-      throw Exception(e);
+      return 0;
     }
   }
 
-  static Future<int> deleteRow({required String itemNameToDelete}) async {
+  static Future<int> deleteItem({required String itemNameToDelete}) async {
     final db = await DatabaseHelper.instace.databese;
     try {
       await db.delete(ShopItemsListFiled.TableName,
-          where: '${ShopItemsListFiled.ItemName} = ?',
+          where: '${ShopItemsListFiled.ItemShop} = ?',
           whereArgs: [itemNameToDelete]);
       return 1;
     } catch (e) {
-      throw Exception(e);
+      return 0;
+    }
+  }
+
+  static Future<int> deleteShop({required String shopNameToDelete}) async {
+    final db = await DatabaseHelper.instace.databese;
+    try {
+      await db.delete(ShopItemsListFiled.TableName,
+          where: '${ShopItemsListFiled.ShopName} = ?',
+          whereArgs: [shopNameToDelete]);
+      return 1;
+    } catch (e) {
+      return 0;
     }
   }
 

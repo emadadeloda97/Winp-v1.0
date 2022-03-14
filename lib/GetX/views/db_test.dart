@@ -88,7 +88,7 @@ class _DB_testState extends State<DB_test> {
                   onPressed: () async {
                     // print(await DBShopItemsList.updateRemind('i2',
                     //     valueToAdd: 11));
-                    print(await DBShopItemsList.deleteAndMoveToStock('Item2'));
+                    // print(await DBShopItemsList.deleteAndMoveToStock('Item2'));
                   },
                   child: const Text("Seller ShopItemList")),
               TextButton(
