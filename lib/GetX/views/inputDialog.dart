@@ -249,37 +249,49 @@ class InputShopScreen extends StatelessWidget {
                       for (var item in myInfo.SelectecItemsList) {
                         print(item);
                         if (item.toString().split('|')[1] == 'true') {
-                          print(int.parse(item.toString().split('|')[2]));
+                          String r = await DBShopItemsList.insertFromStock(
+                              DBShopItemsList(
+                                  ItemName: item.toString().split('|')[0],
+                                  ShopName: ShopNameCtrl.text,
+                                  Remind:
+                                      int.parse(item.toString().split('|')[2]),
+                                  Selld: 0));
 
-                          // await DBShopItemsList.insertFromStock(DBShopItemsList(
-                          //     ItemName: item.toString().split('|')[0],
-                          //     ShopName: ShopNameCtrl.text,
-                          //     Remind: int.parse(item.toString().split('|')[2]),
-                          //     Selld: 0));
-                          sleep(const Duration(seconds: 2));
-                          Fluttertoast.showToast(msg: 'msg');
-
-                          Get.snackbar('', 'aaa',
-                              duration: Duration(seconds: 1));
+                          if (r == 'Done') {
+                            TextToast.show(
+                                "تم اضافة ${item.toString().split('|')[0]}",
+                                duration: 3,
+                                bgc: Colors.green);
+                          } else {
+                            TextToast.show(
+                                "فشل ${item.toString().split('|')[0]}",
+                                duration: 3,
+                                bgc: Colors.green);
+                          }
                         } else {
-                          print(int.parse(item.toString().split('|')[2]));
-                          // await DBShopItemsList.insert(DBShopItemsList(
-                          //     ItemName: item.toString().split('|')[0],
-                          //     ShopName: ShopNameCtrl.text,
-                          //     Remind: int.parse(item.toString().split('|')[2]),
-                          //     Selld: 0));
-                          sleep(const Duration(seconds: 2));
-                          Fluttertoast.showToast(msg: 'msg');
-                          print('Done');
+                          int r = await DBShopItemsList.insert(DBShopItemsList(
+                              ItemName: item.toString().split('|')[0],
+                              ShopName: ShopNameCtrl.text,
+                              Remind: int.parse(item.toString().split('|')[2]),
+                              Selld: 0));
+                          if (r == 1) {
+                            TextToast.show(
+                                "تم اضافة ${item.toString().split('|')[0]}",
+                                duration: 3,
+                                bgc: Colors.green);
+                          } else {
+                            TextToast.show(
+                                "فشل ${item.toString().split('|')[0]}",
+                                duration: 3,
+                                bgc: Colors.green);
+                          }
                         }
                       }
-                      Get.snackbar('', 'maghzen',
-                          duration: Duration(seconds: 2),
-                          snackPosition: SnackPosition.BOTTOM);
+
                       Get.back();
                       myInfo.updateShopList();
                     } else {
-                      print('e');
+                      TextToast.show("راجع البيانات", bgc: Colors.red);
                     }
                   }),
             ],
@@ -431,13 +443,15 @@ class InputShopScreen extends StatelessWidget {
 }
 
 class TextToast {
-  static show(String content, {int duration = 3}) {
+  static show(String content,
+      {int duration = 1,
+      Color bgc = const Color.fromARGB(255, 112, 109, 109)}) {
     Fluttertoast.showToast(
       msg: content,
       timeInSecForIosWeb: duration,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.SNACKBAR,
-      backgroundColor: Color.fromARGB(221, 13, 197, 74),
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM_LEFT,
+      backgroundColor: bgc,
       textColor: Colors.white,
       fontSize: 20.0,
     );
