@@ -401,9 +401,7 @@ class InputShopScreen extends StatelessWidget {
           Directionality(
             textDirection: TextDirection.rtl,
             child: Obx(
-              () => ConstrainedBox(
-                constraints:
-                    BoxConstraints.loose(const Size(double.infinity, 200)),
+              () => Expanded(
                 child: SingleChildScrollView(
                   child: Column(
                     children: [

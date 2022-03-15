@@ -261,6 +261,6 @@ class MainScreen extends StatelessWidget {
 ///////////////////////////////////////////////////////////////////////////////////////
 
 
-//TODO: make remove Shop Item Screen
 //TODO: make Edit Shop Item Screen
 //TODO: make Daily Screen
+//TODO: Dialog shel w add ShopItem 

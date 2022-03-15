@@ -96,6 +96,13 @@ class MyInfo extends GetxController {
   }
   //////////////////////////////////////////////////////////
 
+//////////////////////////////////////////////////////////////////////
+/////////////////////Edit shop item screen ctrls/////////////////////////
+  RxBool renameShop = false.obs;
+  void updateRenameShop() {
+    renameShop.value = !renameShop.value;
+  }
+
 //   // @override
 //   // void onInit() async {
 //   //   super.onInit();

@@ -127,8 +127,10 @@ class _DB_testState extends State<DB_test> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          await DBItem.deleteAll();
-          await DBShopItemsList.deleteAll();
+          // await DBItem.deleteAll();
+          // await DBShopItemsList.deleteAll();
+          final db = DatabaseHelper.instace;
+          await db.deleteDatabase();
         },
       ),
     );

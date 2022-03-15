@@ -415,9 +415,9 @@ class DBShopItemsList {
       if (newVale < 0) {
         return 'LESS Stock';
       } else {
+        await db.insert(ShopItemsListFiled.TableName, row.toJSON());
         await DBItem.update({ItemFiled.StockNum: newVale},
             itemName: row.ItemName);
-        await db.insert(ShopItemsListFiled.TableName, row.toJSON());
       }
 
       return "Done";
@@ -582,6 +582,10 @@ ON ${ShopItemsListFiled.TableName}.${ShopItemsListFiled.ItemName} = ${ItemFiled.
       {required String itemName, required String itemShop}) async {
     Map oldData = await DBShopItemsList.read(itemName);
     int itemRemind = oldData[ShopItemsListFiled.Remind];
+    Map OldItemData = await DBItem.read(itemName);
+    int OldItemStock = OldItemData[ItemFiled.StockNum];
+    print(itemRemind);
+    print(OldItemStock);
     try {
       if (itemRemind == 0) {
         await DBShopItemsList.deleteItem(itemNameToDelete: itemName);
@@ -592,6 +596,7 @@ ON ${ShopItemsListFiled.TableName}.${ShopItemsListFiled.ItemName} = ${ItemFiled.
         await DBItem.update({ItemFiled.StockNum: OldItemStock + itemRemind},
             itemName: itemName);
         await DBShopItemsList.deleteItem(itemNameToDelete: itemName);
+
         return 1;
       }
     } catch (e) {
