@@ -170,31 +170,21 @@ class EditItemTextField extends StatelessWidget {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Future<dynamic> EditShopDialog(Map data) async {
-//   final MyInfo myInfo = Get.find(tag: 'MyInfo');
-//   print(await DBShopItemsList.readAll());
-//   return Get.defaultDialog(
-//     title: "تعديل المكان",
-//     titleStyle: ArabicStyle(fontSize: 35),
-//     content: Directionality(
-//         textDirection: TextDirection.rtl,
-//         child: EditShopTextField(
-//           data: data,
-//         )),
-//   );
-// }
 
-class EditShopItemList extends StatelessWidget {
+class EditShopItemListScreen extends StatelessWidget {
   final String shopName;
   final List data;
 
-  const EditShopItemList({Key? key, required this.shopName, required this.data})
+  const EditShopItemListScreen(
+      {Key? key, required this.shopName, required this.data})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final MyInfo myInfo = Get.find(tag: 'MyInfo');
     final TextEditingController shopNameCtrl = TextEditingController();
+    List actions = [];
+    List actionsText = [];
     shopNameCtrl.text = shopName;
     List<String> add = [
       'من المخزن',
@@ -268,10 +258,19 @@ class EditShopItemList extends StatelessWidget {
                 Expanded(
                   child: Container(
                     margin: const EdgeInsets.all(8),
-                    child: ElevatedButton(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
                       style: ElevatedButton.styleFrom(
-                          primary: const Color.fromARGB(255, 206, 88, 80)),
-                      child: Text("حذف", style: ArabicStyle(fontSize: 25)),
+                          primary: const Color.fromRGBO(227, 242, 253, 1),
+                          shape: RoundedRectangleBorder(
+                              side: const BorderSide(
+                                  color: Color.fromARGB(255, 33, 149, 243),
+                                  width: 2),
+                              borderRadius: BorderRadius.circular(15))),
+                      label: Text("حذف", style: ArabicStyle(fontSize: 25)),
                       onPressed: () {},
                     ),
                   ),
@@ -281,12 +280,16 @@ class EditShopItemList extends StatelessWidget {
                   hint: 'شيل',
                   items: remove,
                   data: {},
+                  actions: actions,
+                  actionsList: actionsText,
                 )),
                 Expanded(
                     child: EditShopItemDropDown(
                   hint: 'اضافة',
                   items: add,
                   data: {},
+                  actions: actions,
+                  actionsList: actionsText,
                 )),
               ],
             ),
@@ -308,23 +311,133 @@ class EditShopItemList extends StatelessWidget {
               itemBuilder: (BuildContext context, int index) {
                 return EditShopItemCard(
                   data: data[index],
+                  actions: actions,
+                  actionsText: actionsText,
                 );
               },
             ),
           ),
         ],
       ),
-      bottomNavigationBar:
-          MyBottomAppBar(myInfo: myInfo, child: BottomBarRow()),
+      bottomNavigationBar: MyBottomAppBar(
+          myInfo: myInfo, child: BottomBarRow(actions, actionsText)),
+    );
+  }
+
+  void addToItem({required Map args}) async {
+    print(
+        'add to ${args['itemName']}+to stock${args['toStock']},${args['amount']}');
+    int r = await DBShopItemsList.addToRemind(
+        item: args['itemName'],
+        fromStock: args['fromStock'],
+        valueToAdd: args['amount'],
+        newValue: args['data']['Remind'] + args['amount']);
+    if (r == 1) {
+      TextToast.show('done');
+    } else {
+      TextToast.show('faild');
+    }
+    myInfo.updateShopList();
+  }
+
+  void removeFromItem({
+    required Map args,
+  }) async {
+    print(
+        'add to ${args['itemName']}+to stock${args['toStock']},${args['amount']}');
+    int r = await DBShopItemsList.removeFromRemind(
+        item: args['itemName'],
+        toStock: args['toStock'],
+        valueToAdd: args['amount'],
+        newValue: args['data']['Remind'] - args['amount']);
+    if (r == 1) {
+      TextToast.show('done');
+    } else {
+      TextToast.show('faild');
+    }
+    myInfo.updateShopList();
+  }
+
+  Row BottomBarRow(actions, List actionsText) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        TextButton.icon(
+          style: TextButton.styleFrom(padding: const EdgeInsets.all(5)),
+          label: Text('حذف',
+              style: ArabicStyle(
+                  fontSize: 30,
+                  color: (myInfo.isDark)
+                      ? const Color.fromARGB(255, 175, 171, 165)
+                      : const Color.fromARGB(255, 45, 70, 184),
+                  weight: FontWeight.w700)),
+          icon: Icon(
+            Icons.remove_circle_outline_outlined,
+            size: 30,
+            color: (myInfo.isDark)
+                ? const Color.fromARGB(255, 175, 171, 165)
+                : const Color.fromARGB(255, 45, 70, 184),
+          ),
+          onPressed: () async {},
+        ),
+        TextButton.icon(
+          label: Text('حفظ التعديلات',
+              style: ArabicStyle(
+                  fontSize: 30,
+                  color: (myInfo.isDark)
+                      ? const Color.fromARGB(255, 175, 171, 165)
+                      : const Color.fromARGB(255, 45, 70, 184),
+                  weight: FontWeight.w700)),
+          icon: Icon(
+            Icons.check_box,
+            size: 30,
+            color: (myInfo.isDark)
+                ? const Color.fromARGB(255, 175, 171, 165)
+                : const Color.fromARGB(255, 45, 70, 184),
+          ),
+          onPressed: () {
+            Get.defaultDialog(
+                content: Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: Column(
+                      children: actionsText
+                          .map((e) => Text(
+                                e,
+                                style: ArabicStyle(fontSize: 18),
+                              ))
+                          .toList(),
+                    )),
+                onConfirm: () async {
+                  for (var item in actions) {
+                    switch (item[0]) {
+                      case 'removeFromItem':
+                        removeFromItem(args: item[1]);
+                        break;
+                      case 'addToItem':
+                        addToItem(args: item[1]);
+                        break;
+                    }
+                  }
+                  Get.back();
+                  Get.back();
+                });
+          },
+        ),
+      ],
     );
   }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
 class EditShopItemCard extends StatelessWidget {
   final Map data;
-  const EditShopItemCard({Key? key, required this.data}) : super(key: key);
+  List actions;
+  List actionsText;
+  EditShopItemCard(
+      {Key? key,
+      required this.data,
+      required this.actions,
+      required this.actionsText})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -374,10 +487,19 @@ class EditShopItemCard extends StatelessWidget {
                 Expanded(
                   child: Container(
                     margin: const EdgeInsets.all(8),
-                    child: ElevatedButton(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
                       style: ElevatedButton.styleFrom(
-                          primary: const Color.fromARGB(255, 206, 88, 80)),
-                      child: Text("حذف", style: ArabicStyle(fontSize: 25)),
+                          primary: const Color.fromRGBO(227, 242, 253, 1),
+                          shape: RoundedRectangleBorder(
+                              side: const BorderSide(
+                                  color: Color.fromARGB(255, 33, 149, 243),
+                                  width: 2),
+                              borderRadius: BorderRadius.circular(15))),
+                      label: Text("حذف", style: ArabicStyle(fontSize: 25)),
                       onPressed: () {},
                     ),
                   ),
@@ -387,12 +509,16 @@ class EditShopItemCard extends StatelessWidget {
                   hint: 'شيل',
                   items: remove,
                   data: data,
+                  actions: actions,
+                  actionsList: actionsText,
                 )),
                 Expanded(
                     child: EditShopItemDropDown(
                   hint: 'اضافة',
                   items: add,
                   data: data,
+                  actions: actions,
+                  actionsList: actionsText,
                 )),
               ],
             ),
@@ -405,8 +531,15 @@ class EditShopItemDropDown extends StatelessWidget {
   final String hint;
   final List items;
   final Map data;
-  const EditShopItemDropDown(
-      {Key? key, required this.items, required this.hint, required this.data})
+  List actions;
+  List actionsList;
+  EditShopItemDropDown(
+      {Key? key,
+      required this.items,
+      required this.hint,
+      required this.data,
+      required this.actions,
+      required this.actionsList})
       : super(key: key);
 
   @override
@@ -415,14 +548,20 @@ class EditShopItemDropDown extends StatelessWidget {
       textDirection: TextDirection.rtl,
       child: Container(
         margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-            color: Colors.blue, borderRadius: BorderRadius.circular(4)),
-        // alignment: AlignmentDirectional.center,
         child: DropdownButtonHideUnderline(
           child: DropdownButton2(
+            hint: Row(
+              children: [
+                Text(
+                  hint,
+                  style: ArabicStyle(),
+                ),
+                Icon(
+                  hint == 'شيل' ? Icons.remove : Icons.add,
+                )
+              ],
+            ),
             alignment: AlignmentDirectional.center,
-            hint: Text(hint, style: ArabicStyle()),
-            iconSize: 0,
             items: items
                 .map((item) => DropdownMenuItem<String>(
                       value: item,
@@ -433,120 +572,121 @@ class EditShopItemDropDown extends StatelessWidget {
               switch (value) {
                 case 'للمخزن':
                   {
-                    final TextEditingController amount =
-                        TextEditingController();
-                    Get.defaultDialog(
-                        middleText: '$data',
-                        title: ' شيل  للمخزن \n${data['ItemName']}',
-                        titleStyle: ArabicStyle(),
-                        content: Directionality(
-                          textDirection: TextDirection.rtl,
-                          child: Row(
-                            children: [
-                              Text(
-                                'هتشيل قد ايه : ',
-                                style: ArabicStyle(),
-                              ),
-                              Expanded(
-                                  child: TextField(
-                                controller: amount,
-                                decoration: InputDecoration(
-                                    border: OutlineInputBorder()),
-                              ))
-                            ],
-                          ),
-                        ));
-                    removeFromItem(
-                        itemName: 'itemName', toStock: true, amount: 100);
+                    ShopItemDropDownButtonFunction(
+                        data, TextValues.removeToSrock);
                   }
                   break;
                 case 'شيل خالص':
                   {
-                    removeFromItem(
-                        itemName: 'itemName', toStock: false, amount: 100);
+                    ShopItemDropDownButtonFunction(
+                        data, TextValues.removeToNothing);
                   }
                   break;
                 case 'من برا':
                   {
-                    addToItem(
-                        itemName: 'itemName', fromStock: false, amount: 100);
+                    ShopItemDropDownButtonFunction(
+                        data, TextValues.addFromNothing);
                   }
                   break;
                 case 'من المخزن':
                   {
-                    addToItem(
-                        itemName: 'itemName', fromStock: true, amount: 100);
+                    ShopItemDropDownButtonFunction(
+                        data, TextValues.addFromStock);
                   }
                   break;
               }
             },
-            buttonElevation: 2,
-            dropdownMaxHeight: 250,
-            dropdownWidth: 250,
+            iconSize: 0,
+            buttonDecoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                width: 2,
+                color: const Color.fromARGB(255, 33, 149, 243),
+              ),
+              color: const Color.fromRGBO(227, 242, 253, 1),
+            ),
+            dropdownWidth: 200,
             dropdownDecoration: BoxDecoration(
+              border: Border.all(
+                color: const Color.fromARGB(255, 33, 149, 243),
+              ),
               borderRadius: BorderRadius.circular(14),
             ),
-            buttonWidth: 350,
           ),
         ),
       ),
     );
   }
-}
 
-Row BottomBarRow() {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    children: [
-      TextButton.icon(
-        style: TextButton.styleFrom(padding: const EdgeInsets.all(5)),
-        label: Text('حذف',
-            style: ArabicStyle(
-                fontSize: 30,
-                color: (myInfo.isDark)
-                    ? const Color.fromARGB(255, 175, 171, 165)
-                    : const Color.fromARGB(255, 45, 70, 184),
-                weight: FontWeight.w700)),
-        icon: Icon(
-          Icons.remove_circle_outline_outlined,
-          size: 30,
-          color: (myInfo.isDark)
-              ? const Color.fromARGB(255, 175, 171, 165)
-              : const Color.fromARGB(255, 45, 70, 184),
+  void ShopItemDropDownButtonFunction(Map data, dynamic value) {
+    final TextEditingController amount = TextEditingController();
+    Get.defaultDialog(
+        middleText: '$data',
+        title: ' ${value[0]} \n${data['ItemName']}',
+        titleStyle: ArabicStyle(),
+        content: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Row(
+            children: [
+              Text(
+                '${value[1]} ',
+                style: ArabicStyle(),
+              ),
+              Expanded(
+                  child: TextField(
+                keyboardType: TextInputType.number,
+                controller: amount,
+                decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15))),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              ))
+            ],
+          ),
         ),
-        onPressed: () async {},
-      ),
-      TextButton.icon(
-        label: Text('اضافة',
-            style: ArabicStyle(
-                fontSize: 30,
-                color: (myInfo.isDark)
-                    ? const Color.fromARGB(255, 175, 171, 165)
-                    : const Color.fromARGB(255, 45, 70, 184),
-                weight: FontWeight.w700)),
-        icon: Icon(
-          Icons.add_circle_outline_outlined,
-          size: 30,
-          color: (myInfo.isDark)
-              ? const Color.fromARGB(255, 175, 171, 165)
-              : const Color.fromARGB(255, 45, 70, 184),
-        ),
-        onPressed: () {},
-      ),
-    ],
-  );
+        textConfirm: 'حفظ',
+        textCancel: 'الغاء',
+        onConfirm: () {
+          if (amount.text != '') {
+            if (value == TextValues.addFromNothing ||
+                value == TextValues.addFromStock) {
+              actions.add([
+                'addToItem',
+                {
+                  'itemName': data['ItemName'],
+                  'fromStock': value[2],
+                  'amount': int.parse(amount.text),
+                  'data': data
+                }
+              ]);
+              actionsList.add(
+                  'اضافة ${amount.text} الي ${data['ItemName']} من ${value[2] ? 'المخزن' : 'برا'}');
+            } else {
+              actions.add([
+                'removeFromItem',
+                {
+                  'itemName': data['ItemName'],
+                  'toStock': value[2],
+                  'amount': int.parse(amount.text),
+                  'data': data
+                }
+              ]);
+              actionsList.add(
+                  'حذف ${amount.text} من ${data['ItemName']} ${value[2] ? 'للمخزن' : 'لبرا'}');
+            }
+            TextToast.show('${value[0]}');
+
+            Get.back();
+          }
+        });
+  }
 }
 
-void addToItem(
-    {required String itemName,
-    required bool fromStock,
-    required int amount}) async {
-  print('add to $itemName+$fromStock,$amount');
+class TextValues {
+  static List removeToSrock = ['شيل للمخزن', 'هتشيل قد ايه : ', true];
+  static List removeToNothing = ['شيل خالص', 'هتشيل قد ايه : ', false];
+  static List addFromStock = ['اضافة من المخزن', 'هضيف قد ايه : ', true];
+  static List addFromNothing = ['اضافة من برا', 'هضيف قد ايه : ', false];
 }
-
-void removeFromItem(
-    {required String itemName,
-    required bool toStock,
-    required int amount}) async {
-  print('remove from $itemName+$toStock,$amount');
-}
+////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////

@@ -150,8 +150,8 @@ class SmallShopCard extends StatelessWidget {
                         await DBShopItemsList.joinShopItemListSellPrice(
                             "${list.first['ShopName']}");
 
-                    Get.to(
-                        () => EditShopItemList(shopName: shopName, data: list));
+                    Get.to(() =>
+                        EditShopItemListScreen(shopName: shopName, data: list));
                   },
                   child: Text(
                     'تعديل',

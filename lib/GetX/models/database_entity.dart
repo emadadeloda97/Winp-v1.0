@@ -637,6 +637,56 @@ ON ${ShopItemsListFiled.TableName}.${ShopItemsListFiled.ItemName} = ${ItemFiled.
       throw Exception(e);
     }
   }
+
+  static Future<int> addToRemind(
+      {required String item,
+      required bool fromStock,
+      required int valueToAdd,
+      required int newValue}) async {
+    try {
+      if (fromStock) {
+        Map oldStock = await DBItem.read(item);
+        await DBItem.update(
+            {ItemFiled.StockNum: oldStock[ItemFiled.StockNum] - valueToAdd},
+            itemName: item);
+        await DBShopItemsList.update({ShopItemsListFiled.Remind: newValue},
+            itemName: item);
+        print(oldStock);
+      } else {
+        await DBShopItemsList.update({ShopItemsListFiled.Remind: newValue},
+            itemName: item);
+      }
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
+  }
+
+  static Future<int> removeFromRemind(
+      {required String item,
+      required bool toStock,
+      required int valueToAdd,
+      required int newValue}) async {
+    try {
+      if (toStock) {
+        Map oldStock = await DBItem.read(item);
+        await DBItem.update(
+            {ItemFiled.StockNum: oldStock[ItemFiled.StockNum] + valueToAdd},
+            itemName: item);
+        await DBShopItemsList.update({ShopItemsListFiled.Remind: newValue},
+            itemName: item);
+        print(oldStock);
+      } else {
+        await DBShopItemsList.update({ShopItemsListFiled.Remind: newValue},
+            itemName: item);
+      }
+      return 1;
+    } catch (e) {
+      print(e);
+      return 0;
+    }
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
