@@ -59,7 +59,6 @@ class DatabaseHelper {
       ${DailySellFiled.ShopName}	TEXT NOT NULL UNIQUE,
       ${DailySellFiled.Selled}	INTEGER,
       PRIMARY KEY(${DailySellFiled.Date},${DailySellFiled.ItemName},${DailySellFiled.ShopName}),
-      FOREIGN KEY(${DailySellFiled.ShopName}) REFERENCES ${ShopItemsListFiled.TableName}(${ShopItemsListFiled.ShopName}),
       FOREIGN KEY(${DailySellFiled.ItemName}) REFERENCES ${ItemFiled.TableName}(${ItemFiled.ItemName})
       )''');
   }

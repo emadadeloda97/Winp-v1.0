@@ -8,22 +8,22 @@ import 'package:oda_tables/GetX/models/database_entity.dart';
 import 'package:oda_tables/GetX/views/comp.dart';
 import 'package:oda_tables/GetX/views/inputDialog.dart';
 import 'package:oda_tables/GetX/views/removeDialog.dart';
+
 import 'EditDialog.dart';
 import 'moreInfoScreen.dart';
 
 ////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 class WhatYouSell extends StatelessWidget {
-  static String routeName = '/whatYouSellScreen';
   // final DBCont dbCont = Get.find(tag: 'database');
-  final MyInfo myInfo = Get.find(tag: 'MyInfo');
 
-  WhatYouSell({
+  const WhatYouSell({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final MyInfo myInfo = Get.find(tag: 'MyInfo');
     print("whatYouSellEnter");
     // myInfo.updateItemList();
     return Scaffold(

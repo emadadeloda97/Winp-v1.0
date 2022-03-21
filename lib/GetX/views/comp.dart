@@ -128,6 +128,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
         leading: null,
+        automaticallyImplyLeading: false,
         toolbarHeight: 80,
         flexibleSpace: Container(
             decoration: BoxDecoration(

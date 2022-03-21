@@ -145,103 +145,6 @@ class DBItem {
 ////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
-class ShopFiled {
-  static final List<String> values = [
-    ShopID,
-    ShopName,
-  ];
-  static const String ShopID = '_ShopID';
-  static const String ShopName = 'ShopName';
-  static const String TableName = 'ShopTable';
-}
-
-class DBShop {
-  final int? ShopID;
-  final String ShopName;
-
-  const DBShop({
-    this.ShopID,
-    required this.ShopName,
-  });
-
-  Map<String, Object?> toJSON() => {
-        ShopFiled.ShopID: ShopID,
-        ShopFiled.ShopName: ShopName,
-      };
-
-  static Future<int> insert(DBShop row) async {
-    final db = await DatabaseHelper.instace.databese;
-    try {
-      await db.insert(ShopFiled.TableName, row.toJSON());
-      return 1;
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
-  static Future<Map> read(String ShopName) async {
-    final db = await DatabaseHelper.instace.databese;
-    final map = await db.query(ShopFiled.TableName,
-        columns: ShopFiled.values,
-        where: "ShopName = ?",
-        whereArgs: [ShopName]);
-    if (map.isNotEmpty) {
-      return map.first;
-    } else {
-      throw Exception('Itme $ShopName not found');
-    }
-  }
-
-  static Future<List<Map>> readAll() async {
-    final db = await DatabaseHelper.instace.databese;
-    try {
-      final map = await db.query(
-        ShopFiled.TableName,
-      );
-      return map;
-    } catch (e) {
-      return [
-        {"not": "e.toString()"}
-      ];
-    }
-  }
-
-  static Future<void> delete(String shop) async {
-    final db = await DatabaseHelper.instace.databese;
-    try {
-      await db.delete(ShopFiled.TableName,
-          where: '${ShopFiled.ShopName} = ?', whereArgs: [shop]);
-    } catch (e) {
-      throw Exception(e);
-    }
-  }
-
-  static Future<List<String>> readAllNames() async {
-    final db = await DatabaseHelper.instace.databese;
-    final List<String> ShopNames = [];
-    try {
-      final map = await db.query(
-        ShopFiled.TableName,
-      );
-      for (var item in map) {
-        ShopNames.add(item['ShopName'].toString());
-      }
-      return ShopNames;
-    } catch (e) {
-      return throw Exception(e);
-    }
-  }
-
-  static Future deleteAll() async {
-    final db = await DatabaseHelper.instace.databese;
-    try {
-      await db.delete(ShopFiled.TableName);
-    } catch (e) {
-      print('ERROR');
-    }
-  }
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -279,88 +182,70 @@ class DBDailySell {
         DailySellFiled.Selled: Selld,
       };
 
-  static Future<String> insert(DBDailySell row) async {
-    final db = await DatabaseHelper.instace.databese;
-    Map oldData = await DBShopItemsList.read(row.ItemName);
-    await DBShopItemsList.updataSelled(
-        row.ItemName, oldData[ShopItemsListFiled.Selled] + row.Selld);
-    try {
-      await db.insert(DailySellFiled.TableName, row.toJSON());
-      return "done";
-    } catch (e) {
-      print(e);
-      return 'error';
-    }
-  }
-
-  static Future<String> updateSelled(String ItemName, int sell) async {
-    final db = await DatabaseHelper.instace.databese;
-    Map oldData = await DBShopItemsList.read(ItemName);
-    Map oldSell = await DBDailySell.read(ItemName);
-    int newVal = oldData[ShopItemsListFiled.Selled] -
-        oldSell[DailySellFiled.Selled] +
-        sell;
-
-    await DBShopItemsList.updataSelled(ItemName, newVal);
-    try {
-      await db.update(
-        DailySellFiled.TableName,
-        {DailySellFiled.Selled: sell},
-        where: '${DailySellFiled.ItemName} = ?',
-        whereArgs: [ItemName],
-      );
-      return "done";
-    } catch (e) {
-      print(e);
-      return 'error';
-    }
-  }
-
-  static Future<Map> read(String item) async {
-    final db = await DatabaseHelper.instace.databese;
-    final map = await db.query(DailySellFiled.TableName,
-        columns: DailySellFiled.values,
-        where: "${DailySellFiled.ItemName} = ?",
-        whereArgs: [item]);
-    if (map.isNotEmpty) {
-      return map.first;
-    } else {
-      throw Exception('Itme $item not found');
-    }
-  }
-
   static Future<List<Map>> readAll() async {
     final db = await DatabaseHelper.instace.databese;
-    try {
-      final map = await db.query(
-        DailySellFiled.TableName,
-      );
-      return map;
-    } catch (e) {
-      return [
-        {"not": "e.toString()"}
-      ];
-    }
+    final list = await db.query(
+      DailySellFiled.TableName,
+    );
+    return list;
   }
 
-  static Future<String> deleteRow(String date) async {
+  static Future<void> deleteAll() async {
     final db = await DatabaseHelper.instace.databese;
-    try {
-      await db.delete(DailySellFiled.TableName,
-          where: '${DailySellFiled.Date} = ?', whereArgs: [date]);
-      return "done";
-    } catch (e) {
-      return "not";
-    }
+    await db.delete(
+      DailySellFiled.TableName,
+    );
   }
 
-  static Future deleteAll() async {
+  static Future<void> insertRow(DBDailySell data) async {
+    await deleteAll();
     final db = await DatabaseHelper.instace.databese;
-    try {
-      await db.delete(DailySellFiled.TableName);
-    } catch (e) {
-      print('ERROR');
+    print(await DBDailySell.readAll());
+
+    print(data.toJSON());
+    var old = await DBShopItemsList.read('${data.ItemName}_${data.ShopName}');
+    print(old);
+    if (old['Remind'] >= data.Selld) {
+      await db.update(
+          ShopItemsListFiled.TableName,
+          {
+            'Remind': old['Remind'] - data.Selld,
+            'Selled': old['Selled'] + data.Selld
+          },
+          where: 'ItemShop = ?',
+          whereArgs: ['${data.ItemName}_${data.ShopName}']);
+      await db.insert(DailySellFiled.TableName, data.toJSON());
+    } else {
+      print('LessThan');
     }
+    print(await DBDailySell.readAll());
+    print(await DBShopItemsList.read('${data.ItemName}_${data.ShopName}'));
+  }
+
+  static rollback(
+      {required String date,
+      required String item,
+      required String shop}) async {
+    final db = await DatabaseHelper.instace.databese;
+    var old = await DBShopItemsList.read('${item}_$shop');
+    print(await DBDailySell.readAll());
+    try {
+      var oldD = await db.rawQuery('''
+      SELECT * FROM ${DailySellFiled.TableName} WHERE (Date='$date' AND ItemName='$item' AND ShopName='$shop')
+''');
+      print(oldD);
+    } catch (e) {
+      print(e);
+    }
+
+    // await db.update(
+    //     ShopItemsListFiled.TableName,
+    //     {
+    //       'Remind': old['Remind'] - data.Selld,
+    //       'Selled': old['Selled'] + data.Selld
+    //     },
+    //     where: 'ItemShop = ?',
+    //     whereArgs: ['${data.ItemName}_${data.ShopName}']);
   }
 }
 
@@ -438,12 +323,12 @@ class DBShopItemsList {
     }
   }
 
-  static Future<Map> read(String value) async {
+  static Future<Map> read(String ItemShop) async {
     final db = await DatabaseHelper.instace.databese;
     final map = await db.query(ShopItemsListFiled.TableName,
         columns: ShopItemsListFiled.values,
-        where: "${ShopItemsListFiled.ItemName} = ?",
-        whereArgs: [value]);
+        where: "${ShopItemsListFiled.ItemShop} = ?",
+        whereArgs: [ItemShop]);
     if (map.isNotEmpty) {
       return map.first;
     } else {
@@ -580,7 +465,7 @@ ON ${ShopItemsListFiled.TableName}.${ShopItemsListFiled.ItemName} = ${ItemFiled.
 
   static Future<int> deleteAndMoveToStock(
       {required String itemName, required String itemShop}) async {
-    Map oldData = await DBShopItemsList.read(itemName);
+    Map oldData = await DBShopItemsList.read(itemShop);
     int itemRemind = oldData[ShopItemsListFiled.Remind];
     Map OldItemData = await DBItem.read(itemName);
     int OldItemStock = OldItemData[ItemFiled.StockNum];
@@ -588,14 +473,14 @@ ON ${ShopItemsListFiled.TableName}.${ShopItemsListFiled.ItemName} = ${ItemFiled.
     print(OldItemStock);
     try {
       if (itemRemind == 0) {
-        await DBShopItemsList.deleteItem(itemNameToDelete: itemName);
+        await DBShopItemsList.deleteItemShop(itemShopNameToDelete: itemShop);
         return 1;
       } else {
         Map OldItemData = await DBItem.read(itemName);
         int OldItemStock = OldItemData[ItemFiled.StockNum];
         await DBItem.update({ItemFiled.StockNum: OldItemStock + itemRemind},
             itemName: itemName);
-        await DBShopItemsList.deleteItem(itemNameToDelete: itemName);
+        await DBShopItemsList.deleteItemShop(itemShopNameToDelete: itemShop);
 
         return 1;
       }
@@ -608,8 +493,21 @@ ON ${ShopItemsListFiled.TableName}.${ShopItemsListFiled.ItemName} = ${ItemFiled.
     final db = await DatabaseHelper.instace.databese;
     try {
       await db.delete(ShopItemsListFiled.TableName,
-          where: '${ShopItemsListFiled.ItemShop} = ?',
+          where: '${ShopItemsListFiled.ItemName} = ?',
           whereArgs: [itemNameToDelete]);
+      return 1;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  static Future<int> deleteItemShop(
+      {required String itemShopNameToDelete}) async {
+    final db = await DatabaseHelper.instace.databese;
+    try {
+      await db.delete(ShopItemsListFiled.TableName,
+          where: '${ShopItemsListFiled.ItemShop} = ?',
+          whereArgs: [itemShopNameToDelete]);
       return 1;
     } catch (e) {
       return 0;
@@ -687,6 +585,10 @@ ON ${ShopItemsListFiled.TableName}.${ShopItemsListFiled.ItemName} = ${ItemFiled.
       return 0;
     }
   }
+
+// static Future<int> updataReminFromDaily(int oldRemind)async{
+
+// }
 }
 ////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////

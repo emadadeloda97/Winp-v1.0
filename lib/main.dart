@@ -4,6 +4,7 @@ import 'package:oda_tables/GetX/views/SellPlaces.dart';
 import 'package:oda_tables/GetX/views/db_test.dart';
 import 'package:oda_tables/GetX/views/comp.dart';
 import 'package:get/get.dart';
+import 'GetX/views/DailySell.dart';
 import 'GetX/views/whatYouSell.dart';
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -87,10 +88,10 @@ class RouteScreen extends StatelessWidget {
       ),
       body: TabBarView(
         controller: tabBarCont.controller,
-        children: [
-          const DB_test(),
+        children: const [
+          DailySellScreen(),
           WhatYouSell(),
-          const SellPlaces(),
+          SellPlaces(),
         ],
       ),
     );

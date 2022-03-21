@@ -317,10 +317,33 @@ class EditShopItemListScreen extends StatelessWidget {
               },
             ),
           ),
+          SizedBox(
+            height: 50,
+          ),
         ],
       ),
       bottomNavigationBar: MyBottomAppBar(
           myInfo: myInfo, child: BottomBarRow(actions, actionsText)),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Get.to(() => AddNewItemToExistShop(data: data));
+        },
+        label: Text('اضافة سلعة',
+            style: ArabicStyle(
+                fontSize: 30,
+                color: (myInfo.isDark)
+                    ? const Color.fromARGB(255, 175, 171, 165)
+                    : const Color.fromARGB(255, 45, 70, 184),
+                weight: FontWeight.w700)),
+        icon: Icon(
+          Icons.add_circle_outline_outlined,
+          size: 30,
+          color: (myInfo.isDark)
+              ? const Color.fromARGB(255, 175, 171, 165)
+              : const Color.fromARGB(255, 45, 70, 184),
+        ),
+        backgroundColor: Color.fromRGBO(93, 100, 150, 1),
+      ),
     );
   }
 
@@ -500,7 +523,9 @@ class EditShopItemCard extends StatelessWidget {
                                   width: 2),
                               borderRadius: BorderRadius.circular(15))),
                       label: Text("حذف", style: ArabicStyle(fontSize: 25)),
-                      onPressed: () {},
+                      onPressed: () {
+                        RemoveItemShopDialog(data);
+                      },
                     ),
                   ),
                 ),
@@ -620,6 +645,7 @@ class EditShopItemDropDown extends StatelessWidget {
 
   void ShopItemDropDownButtonFunction(Map data, dynamic value) {
     final TextEditingController amount = TextEditingController();
+    // myInfo.allAmount.value ? amount.text = data['Remind'] : amount.text = '';
     Get.defaultDialog(
         middleText: '$data',
         title: ' ${value[0]} \n${data['ItemName']}',
@@ -640,13 +666,15 @@ class EditShopItemDropDown extends StatelessWidget {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15))),
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              ))
+              )),
             ],
           ),
         ),
         textConfirm: 'حفظ',
         textCancel: 'الغاء',
         onConfirm: () {
+          print(data);
+          int reqAmount = 0;
           if (amount.text != '') {
             if (value == TextValues.addFromNothing ||
                 value == TextValues.addFromStock) {
@@ -683,10 +711,339 @@ class EditShopItemDropDown extends StatelessWidget {
 }
 
 class TextValues {
-  static List removeToSrock = ['شيل للمخزن', 'هتشيل قد ايه : ', true];
-  static List removeToNothing = ['شيل خالص', 'هتشيل قد ايه : ', false];
-  static List addFromStock = ['اضافة من المخزن', 'هضيف قد ايه : ', true];
-  static List addFromNothing = ['اضافة من برا', 'هضيف قد ايه : ', false];
+  static List removeToSrock = [
+    'شيل للمخزن',
+    'هتشيل قد ايه : ',
+    true,
+  ];
+  static List removeToNothing = [
+    'شيل خالص',
+    'هتشيل قد ايه : ',
+    false,
+  ];
+  static List addFromStock = [
+    'اضافة من المخزن',
+    'هضيف قد ايه : ',
+    true,
+  ];
+  static List addFromNothing = [
+    'اضافة من برا',
+    'هضيف قد ايه : ',
+    false,
+  ];
 }
-////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////
+
+RemoveItemShopDialog(data) {
+  Get.defaultDialog(
+      title: " : هتعمل ايه في البضاعة ",
+      titleStyle: ArabicStyle(),
+      content: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Obx(
+                () => Checkbox(
+                  value: myInfo.removeDialogShopItemCheckBoxValue.value,
+                  onChanged: (b) =>
+                      myInfo.updateRemoveDialogShopItemCheckBoxValue(),
+                ),
+              ),
+              Text(
+                "رجع علي المخزن",
+                style: ArabicStyle(),
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Obx(
+                () => Checkbox(
+                  value: !myInfo.removeDialogShopItemCheckBoxValue.value,
+                  onChanged: (b) =>
+                      myInfo.updateRemoveDialogShopItemCheckBoxValue(),
+                ),
+              ),
+              Text(
+                "شيلهم خالص",
+                style: ArabicStyle(),
+              ),
+            ],
+          ),
+        ],
+      ),
+      textCancel: "الغاء",
+      textConfirm: "تم",
+      onConfirm: () async {
+        if (myInfo.removeDialogShopItemCheckBoxValue.value) {
+          //// go to stock
+          print('form Stock');
+          var Items = await DBShopItemsList.read(data['ItemShop']);
+
+          print(Items['ItemName']);
+          await DBShopItemsList.deleteAndMoveToStock(
+              itemShop: data['ItemShop'], itemName: data['ItemName']);
+          TextToast.show(
+              "تم حذف ${data['ItemName']} واضافة  ${data['Remind']} الي المخزن",
+              duration: 3);
+
+          await DBShopItemsList.deleteItemShop(
+              itemShopNameToDelete: data['ItemShop']);
+          Get.back();
+          myInfo.updateShopList();
+        } else {
+          /// remove
+          print('remove');
+          await DBShopItemsList.deleteItemShop(
+              itemShopNameToDelete: data['ItemShop']);
+          TextToast.show("تم حذف $data['ShopName']اضافة ", duration: 3);
+          Get.back();
+          myInfo.updateShopList();
+        }
+      });
+}
+
+class AddNewItemToExistShop extends StatelessWidget {
+  const AddNewItemToExistShop({Key? key, required this.data}) : super(key: key);
+  final List data;
+
+  @override
+  Widget build(BuildContext context) {
+    myInfo.resetShopItemListAddNew();
+    final amont = TextEditingController();
+    var newItemList = myInfo.ItemsNames;
+    print(newItemList);
+    for (var item in data) {
+      newItemList.remove(item['ItemName']);
+    }
+    print(newItemList);
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        appBar: MyAppBar(
+          myInfo: myInfo,
+          title: Text('اضافة سلعة'),
+        ),
+        body: Column(
+          children: [
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(8),
+                decoration: containerDecoration(),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'اسم الصنف',
+                            style: ArabicStyle(),
+                          ),
+                        ),
+                        Expanded(
+                          child: Obx(() => DropdownButton(
+                              value: myInfo.ItemSelectedName.value,
+                              items: newItemList
+                                  .map((element) => DropdownMenuItem(
+                                        child: Text(element),
+                                        value: element,
+                                      ))
+                                  .toList(),
+                              onChanged: (v) => myInfo.updateItemSelected(v))),
+                        ),
+                        Expanded(
+                            child: TextField(
+                          controller: amont,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          decoration: InputDecoration(
+                              labelText: 'الكمية',
+                              labelStyle: ArabicStyle(),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(25))),
+                        )),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'من المخزن',
+                            style: ArabicStyle(fontSize: 20),
+                          ),
+                        ),
+                        Obx(
+                          () => Checkbox(
+                              value: myInfo.fromStock.value,
+                              onChanged: (v) {
+                                myInfo.updateFromStockValue(v);
+                              }),
+                        ),
+                        TextButton.icon(
+                            label: Text(
+                              'اضافة الي القائمة',
+                              style: ArabicStyle(fontSize: 20),
+                            ),
+                            icon: const Icon(
+                              Icons.add_circle_outline_outlined,
+                              color: Colors.black,
+                            ),
+                            onPressed: () {
+                              if (amont.text != '' &&
+                                  myInfo.ItemSelectedName.value != '') {
+                                myInfo.addItemToSelectedList(
+                                    myInfo.ItemSelectedName.value,
+                                    amont.text,
+                                    myInfo.fromStock.value);
+                              }
+                              print(myInfo.SelectecItemsList);
+                            })
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Directionality(
+              textDirection: TextDirection.rtl,
+              child: Obx(
+                () => Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        ...myInfo.SelectecItemsList.map((element) => Card(
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Text(element),
+                                  IconButton(
+                                      onPressed: (() {
+                                        myInfo.SelectecItemsList.remove(
+                                            element);
+                                        myInfo.ItemsNames.add(
+                                            element.toString().split('|')[0]);
+                                        print(element);
+                                      }),
+                                      icon: const Icon(
+                                        Icons.remove_circle_outline_outlined,
+                                        color: Colors.red,
+                                      ))
+                                ],
+                              ),
+                            ))
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        bottomNavigationBar: MyBottomAppBar(
+          myInfo: myInfo,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              TextButton.icon(
+                style: TextButton.styleFrom(padding: const EdgeInsets.all(5)),
+                label: Text('الغاء',
+                    style: ArabicStyle(
+                        fontSize: 30,
+                        color: (myInfo.isDark)
+                            ? const Color.fromARGB(255, 175, 171, 165)
+                            : const Color.fromARGB(255, 45, 70, 184),
+                        weight: FontWeight.w700)),
+                icon: Icon(
+                  Icons.disabled_by_default_outlined,
+                  size: 30,
+                  color: (myInfo.isDark)
+                      ? const Color.fromARGB(255, 175, 171, 165)
+                      : const Color.fromARGB(255, 45, 70, 184),
+                ),
+                onPressed: () {
+                  myInfo.resetShopItemList();
+                  Get.back();
+                },
+              ),
+              TextButton.icon(
+                  label: Text('حفظ',
+                      style: ArabicStyle(
+                          fontSize: 30,
+                          color: (myInfo.isDark)
+                              ? const Color.fromARGB(255, 175, 171, 165)
+                              : const Color.fromARGB(255, 45, 70, 184),
+                          weight: FontWeight.w700)),
+                  icon: Icon(
+                    Icons.check_box,
+                    size: 30,
+                    color: (myInfo.isDark)
+                        ? const Color.fromARGB(255, 175, 171, 165)
+                        : const Color.fromARGB(255, 45, 70, 184),
+                  ),
+                  onPressed: () async {
+                    if (myInfo.SelectecItemsList.isNotEmpty) {
+                      for (var item in myInfo.SelectecItemsList) {
+                        print(item);
+                        if (item.toString().split('|')[1] == 'true') {
+                          String r = await DBShopItemsList.insertFromStock(
+                              DBShopItemsList(
+                                  ItemName: item.toString().split('|')[0],
+                                  ShopName: data.first['ShopName'],
+                                  Remind:
+                                      int.parse(item.toString().split('|')[2]),
+                                  Selld: 0));
+
+                          if (r == 'Done') {
+                            TextToast.show(
+                                "تم اضافة ${item.toString().split('|')[0]}",
+                                duration: 3,
+                                bgc: Colors.green);
+                          } else {
+                            TextToast.show(
+                                "فشل ${item.toString().split('|')[0]}",
+                                duration: 3,
+                                bgc: Colors.green);
+                          }
+                        } else {
+                          int r = await DBShopItemsList.insert(DBShopItemsList(
+                              ItemName: item.toString().split('|')[0],
+                              ShopName: data.first['ShopName'],
+                              Remind: int.parse(item.toString().split('|')[2]),
+                              Selld: 0));
+                          if (r == 1) {
+                            TextToast.show(
+                                "تم اضافة ${item.toString().split('|')[0]}",
+                                duration: 3,
+                                bgc: Colors.green);
+                          } else {
+                            TextToast.show(
+                                "فشل ${item.toString().split('|')[0]}",
+                                duration: 3,
+                                bgc: Colors.green);
+                          }
+                        }
+                      }
+                      Get.back();
+                      myInfo.updateShopList();
+                    } else {
+                      TextToast.show("راجع البيانات", bgc: Colors.red);
+                    }
+                    myInfo.updateShopList();
+                  }),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
