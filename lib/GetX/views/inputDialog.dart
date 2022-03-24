@@ -1,19 +1,13 @@
 // ignore_for_file: file_names, non_constant_identifier_names, avoid_print
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-
 import 'package:oda_tables/GetX/models/database_entity.dart';
 import 'package:oda_tables/GetX/views/SellPlaces.dart';
 import 'package:oda_tables/GetX/views/comp.dart';
-import 'package:oda_tables/main.dart';
-
+import 'package:path/path.dart';
 import '../controller/Controllers.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 ///////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -157,20 +151,6 @@ class InputItemTextField extends StatelessWidget {
 
 ///////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
-// Future<dynamic> InputShopDialog() {
-//   final MyInfo myInfo = Get.find(tag: 'MyInfo');
-
-//   return Get.defaultDialog(
-//     backgroundColor: (myInfo.isDark)
-//         ? const Color.fromARGB(255, 175, 171, 165)
-//         : const Color.fromARGB(255, 255, 255, 255),
-//     title: "أضافه مكان جديد",
-//     titleStyle: ArabicStyle(
-//         fontSize: 35, color: Colors.blue[800], weight: FontWeight.w700),
-//     content: Directionality(
-//         textDirection: TextDirection.rtl, child: InputShopTextField()),
-//   );
-// }
 
 class InputShopScreen extends StatelessWidget {
   final ShopNameCtrl = TextEditingController();
@@ -431,5 +411,156 @@ class InputShopScreen extends StatelessWidget {
             ),
           ),
         ]));
+  }
+}
+
+/*     DAILY INPUT SCREEN            */
+class InputDailyRecord extends StatelessWidget {
+  const InputDailyRecord({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final MyInfo myInfo = Get.find(tag: 'MyInfo');
+    return Scaffold(
+      backgroundColor: (myInfo.isDark)
+          ? const Color.fromARGB(255, 175, 171, 165)
+          : const Color.fromARGB(255, 255, 255, 255),
+      appBar: MyAppBar(
+          myInfo: myInfo,
+          title: Text(
+            'اضافة تسجيل',
+            style: ArabicStyle(color: Colors.white, fontSize: 35),
+          )),
+      bottomNavigationBar: _MyBottomAppBarr(myInfo),
+      body: _MyBody(context),
+    );
+  }
+
+  MyBottomAppBar _MyBottomAppBarr(MyInfo myInfo) {
+    return MyBottomAppBar(
+      myInfo: myInfo,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          TextButton.icon(
+            style: TextButton.styleFrom(padding: const EdgeInsets.all(5)),
+            label: Text('الغاء',
+                style: ArabicStyle(
+                    fontSize: 30,
+                    color: (myInfo.isDark)
+                        ? const Color.fromARGB(255, 175, 171, 165)
+                        : const Color.fromARGB(255, 45, 70, 184),
+                    weight: FontWeight.w700)),
+            icon: Icon(
+              Icons.disabled_by_default_outlined,
+              size: 30,
+              color: (myInfo.isDark)
+                  ? const Color.fromARGB(255, 175, 171, 165)
+                  : const Color.fromARGB(255, 45, 70, 184),
+            ),
+            onPressed: () {
+              Get.back();
+            },
+          ),
+          TextButton.icon(
+              label: Text('حفظ',
+                  style: ArabicStyle(
+                      fontSize: 30,
+                      color: (myInfo.isDark)
+                          ? const Color.fromARGB(255, 175, 171, 165)
+                          : const Color.fromARGB(255, 45, 70, 184),
+                      weight: FontWeight.w700)),
+              icon: Icon(
+                Icons.check_box,
+                size: 30,
+                color: (myInfo.isDark)
+                    ? const Color.fromARGB(255, 175, 171, 165)
+                    : const Color.fromARGB(255, 45, 70, 184),
+              ),
+              onPressed: () async {}),
+        ],
+      ),
+    );
+  }
+
+  Container _MyBody(context) {
+    return Container(
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8),
+      decoration: containerDecoration(),
+      child: Column(
+        children: [
+          const BasicDateField(),
+          Expanded(
+            child: ListView.builder(
+              itemCount: myInfo.ShopsNames.length,
+              itemBuilder: (BuildContext context, int index) {
+                return GestureDetector(
+                  onTap: () {
+                    myInfo.updateIsExpanted(index, myInfo.ShopsNames[index],
+                        myInfo.isExpanted[index]);
+                  },
+                  child: _MyDailyInputCard(
+                    index: index,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MyDailyInputCard extends StatelessWidget {
+  const _MyDailyInputCard({
+    Key? key,
+    required this.index,
+  }) : super(key: key);
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => Container(
+          margin: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            color: const Color(0xFF2196f3),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Text(
+                      myInfo.ShopsNames[index],
+                      style: ArabicStyle(),
+                    ),
+                    myInfo.isExpanted[index]
+                        ? const Icon(Icons.arrow_drop_up, size: 40)
+                        : const Icon(Icons.arrow_drop_down, size: 40)
+                  ],
+                ),
+                myInfo.isExpanted[index]
+                    ? SizedBox(
+                        height: myInfo.itemShopList.length * 50,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: myInfo.itemShopList
+                              .map((element) => Text(
+                                  '${element['ItemName']} ${element['Selled']}',
+                                  style: ArabicStyle()))
+                              .toList(),
+                        ),
+                      )
+                    : const SizedBox()
+              ],
+            ),
+          )),
+    );
   }
 }

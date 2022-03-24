@@ -55,8 +55,8 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE ${DailySellFiled.TableName} (
       ${DailySellFiled.Date}	TEXT NOT NULL,
-      ${DailySellFiled.ItemName}	TEXT NOT NULL UNIQUE,
-      ${DailySellFiled.ShopName}	TEXT NOT NULL UNIQUE,
+      ${DailySellFiled.ItemName}	TEXT NOT NULL ,
+      ${DailySellFiled.ShopName}	TEXT NOT NULL ,
       ${DailySellFiled.Selled}	INTEGER,
       PRIMARY KEY(${DailySellFiled.Date},${DailySellFiled.ItemName},${DailySellFiled.ShopName}),
       FOREIGN KEY(${DailySellFiled.ItemName}) REFERENCES ${ItemFiled.TableName}(${ItemFiled.ItemName})

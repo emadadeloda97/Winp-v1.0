@@ -198,28 +198,40 @@ class DBDailySell {
   }
 
   static Future<void> insertRow(DBDailySell data) async {
-    await deleteAll();
     final db = await DatabaseHelper.instace.databese;
-    print(await DBDailySell.readAll());
-
-    print(data.toJSON());
     var old = await DBShopItemsList.read('${data.ItemName}_${data.ShopName}');
-    print(old);
-    if (old['Remind'] >= data.Selld) {
-      await db.update(
-          ShopItemsListFiled.TableName,
-          {
-            'Remind': old['Remind'] - data.Selld,
-            'Selled': old['Selled'] + data.Selld
-          },
-          where: 'ItemShop = ?',
-          whereArgs: ['${data.ItemName}_${data.ShopName}']);
-      await db.insert(DailySellFiled.TableName, data.toJSON());
-    } else {
-      print('LessThan');
+    try {
+      if (old['Remind'] >= data.Selld) {
+        await db.update(
+            ShopItemsListFiled.TableName,
+            {
+              'Remind': old['Remind'] - data.Selld,
+              'Selled': old['Selled'] + data.Selld
+            },
+            where: 'ItemShop = ?',
+            whereArgs: ['${data.ItemName}_${data.ShopName}']);
+        await db.insert(DailySellFiled.TableName, data.toJSON());
+      } else {
+        print('LessThan');
+      }
+    } catch (e) {
+      print(e);
     }
-    print(await DBDailySell.readAll());
-    print(await DBShopItemsList.read('${data.ItemName}_${data.ShopName}'));
+  }
+
+  static readRow({required date, required item, required shop}) async {
+    final db = await DatabaseHelper.instace.databese;
+    List<Map<String, Object?>> oldD = await db.rawQuery('''
+      SELECT * FROM ${DailySellFiled.TableName} WHERE (Date='$date' AND ItemName='$item' AND ShopName='$shop')
+''');
+    return oldD.first;
+  }
+
+  static deleteRow({required date, required item, required shop}) async {
+    final db = await DatabaseHelper.instace.databese;
+
+    await db.rawDelete(
+        '''DELETE FROM ${DailySellFiled.TableName} WHERE (Date='$date' AND ItemName='$item' AND ShopName='$shop')''');
   }
 
   static rollback(
@@ -227,25 +239,29 @@ class DBDailySell {
       required String item,
       required String shop}) async {
     final db = await DatabaseHelper.instace.databese;
-    var old = await DBShopItemsList.read('${item}_$shop');
-    print(await DBDailySell.readAll());
     try {
-      var oldD = await db.rawQuery('''
-      SELECT * FROM ${DailySellFiled.TableName} WHERE (Date='$date' AND ItemName='$item' AND ShopName='$shop')
-''');
-      print(oldD);
+      var oldD = await readRow(date: date, item: item, shop: shop);
+      await deleteRow(date: date, item: item, shop: shop);
+      var old = await DBShopItemsList.read('${item}_$shop');
+      print(' r = ${old['Remind']}    ${oldD['Selled']}');
+      print('s = ${old['Selled']}');
+      await db.update(
+          ShopItemsListFiled.TableName,
+          {
+            'Remind': old['Remind'] + oldD['Selled'],
+            'Selled': old['Selled'] - oldD['Selled']
+          },
+          where: 'ItemShop = ?',
+          whereArgs: ['${item}_$shop']);
     } catch (e) {
       print(e);
     }
+  }
 
-    // await db.update(
-    //     ShopItemsListFiled.TableName,
-    //     {
-    //       'Remind': old['Remind'] - data.Selld,
-    //       'Selled': old['Selled'] + data.Selld
-    //     },
-    //     where: 'ItemShop = ?',
-    //     whereArgs: ['${data.ItemName}_${data.ShopName}']);
+  static readByDate({date}) async {
+    final db = await DatabaseHelper.instace.databese;
+    print(await db
+        .query(DailySellFiled.TableName, where: 'Date = ?', whereArgs: [date]));
   }
 }
 

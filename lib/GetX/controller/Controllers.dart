@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:intl/intl.dart';
 
 import 'package:oda_tables/GetX/models/database_entity.dart';
 
@@ -106,6 +107,37 @@ class MyInfo extends GetxController {
   void updateRenameShop() {
     renameShop.value = !renameShop.value;
   }
+
+/* Daily Controller */
+
+  RxList dailyRecord = [].obs;
+  Rx<TextEditingController> dateSelected = TextEditingController().obs;
+  RxList isExpanted = [].obs;
+  RxList itemShopList = [].obs;
+
+  void setDailyRecords() async {
+    dailyRecord.value = await DBDailySell.readAll();
+    dateSelected.value.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    // isExpanted.value = false;
+    isExpanted.value = ShopsNames.map((element) => false).toList();
+  }
+
+  void updateDateSelected(newDate) {
+    String n = DateFormat('yyyy-MM-dd').format(newDate);
+    dateSelected.value.text = n;
+  }
+
+  void updateIsExpanted(index, shopName, isbool) async {
+    if (isbool) {
+      isExpanted.value = ShopsNames.map((element) => false).toList();
+    } else {
+      isExpanted.value = ShopsNames.map((element) => false).toList();
+      isExpanted[index] = true;
+      itemShopList.value = await DBShopItemsList.readByShop(shopName);
+    }
+  }
+
+/* */
 
 //   // @override
 //   // void onInit() async {

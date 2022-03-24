@@ -1,10 +1,12 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:oda_tables/GetX/controller/Controllers.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:oda_tables/GetX/views/SellPlaces.dart';
 
 TextStyle ArabicStyle({double? fontSize, weight, Color? color}) {
   return TextStyle(
@@ -218,5 +220,38 @@ class LoadingToast {
             overflow: TextOverflow.ellipsis,
             style: ArabicStyle(fontSize: 17, color: Colors.white),
           );
+  }
+}
+
+class BasicDateField extends StatelessWidget {
+  const BasicDateField({Key? key}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    final format = DateFormat("yyyy-MM-dd");
+    return Column(children: <Widget>[
+      Obx(
+        (() => DateTimeField(
+              enabled: true,
+              textAlign: TextAlign.center,
+              style: ArabicStyle(),
+              controller: myInfo.dateSelected.value,
+              decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.all(0),
+                  icon: Icon(Icons.today),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(15)))),
+              format: format,
+              resetIcon: null,
+              onSaved: (d) => myInfo.updateDateSelected(d),
+              onShowPicker: (context, currentValue) {
+                return showDatePicker(
+                    context: context,
+                    firstDate: DateTime(2022),
+                    initialDate: currentValue ?? DateTime.now(),
+                    lastDate: DateTime(2030));
+              },
+            )),
+      )
+    ]);
   }
 }
