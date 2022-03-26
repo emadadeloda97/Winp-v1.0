@@ -4,10 +4,10 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:oda_tables/GetX/models/database_entity.dart';
-import 'package:oda_tables/GetX/models/database_helper.dart';
-import 'package:oda_tables/GetX/views/SellPlaces.dart';
-import 'package:oda_tables/GetX/views/comp.dart';
+import 'package:WINP/GetX/models/database_entity.dart';
+
+import 'package:WINP/GetX/views/SellPlaces.dart';
+import 'package:WINP/GetX/views/comp.dart';
 
 import '../controller/Controllers.dart';
 
@@ -849,9 +849,16 @@ class AddNewItemToExistShop extends StatelessWidget {
                         Expanded(
                           child: Obx(() => DropdownButton(
                               value: myInfo.ItemSelectedName.value,
+                              style: const TextStyle(
+                                  overflow: TextOverflow.ellipsis,
+                                  color: Colors.black),
                               items: newItemList
                                   .map((element) => DropdownMenuItem(
-                                        child: Text(element),
+                                        child: SizedBox(
+                                          width: 100,
+                                          child: Text(element,
+                                              overflow: TextOverflow.ellipsis),
+                                        ),
                                         value: element,
                                       ))
                                   .toList(),
@@ -925,7 +932,8 @@ class AddNewItemToExistShop extends StatelessWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  Text(element),
+                                  Text(
+                                      '${element.toString().split('|')[0]} : ${element.toString().split('|')[2]} '),
                                   IconButton(
                                       onPressed: (() {
                                         myInfo.SelectecItemsList.remove(

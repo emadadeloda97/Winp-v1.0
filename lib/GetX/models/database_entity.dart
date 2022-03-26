@@ -1,6 +1,6 @@
 // ignore_for_file: constant_identifier_names, non_constant_identifier_names, avoid_print
 
-import 'package:oda_tables/GetX/models/database_helper.dart';
+import 'package:WINP/GetX/models/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -197,7 +197,7 @@ class DBDailySell {
     );
   }
 
-  static Future<void> insertRow(DBDailySell data) async {
+  static Future<int> insertRow(DBDailySell data) async {
     final db = await DatabaseHelper.instace.databese;
     var old = await DBShopItemsList.read('${data.ItemName}_${data.ShopName}');
     try {
@@ -211,11 +211,14 @@ class DBDailySell {
             where: 'ItemShop = ?',
             whereArgs: ['${data.ItemName}_${data.ShopName}']);
         await db.insert(DailySellFiled.TableName, data.toJSON());
+        return 1;
       } else {
         print('LessThan');
+        return 2;
       }
     } catch (e) {
       print(e);
+      return 0;
     }
   }
 
@@ -260,8 +263,16 @@ class DBDailySell {
 
   static readByDate({date}) async {
     final db = await DatabaseHelper.instace.databese;
-    print(await db
-        .query(DailySellFiled.TableName, where: 'Date = ?', whereArgs: [date]));
+    var l = await readAll();
+    Map r = {};
+    for (var item in l) {
+      var date = item['Date'];
+      var x = await db.query(DailySellFiled.TableName,
+          where: 'Date = ?', whereArgs: [date]);
+      r[date] = x;
+    }
+
+    return r;
   }
 }
 

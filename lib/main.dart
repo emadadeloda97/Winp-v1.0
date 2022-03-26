@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:oda_tables/GetX/controller/Controllers.dart';
-import 'package:oda_tables/GetX/views/SellPlaces.dart';
-import 'package:oda_tables/GetX/views/db_test.dart';
-import 'package:oda_tables/GetX/views/comp.dart';
 import 'package:get/get.dart';
+
+import 'package:WINP/GetX/controller/Controllers.dart';
+import 'package:WINP/GetX/models/database_entity.dart';
+
+import 'package:WINP/GetX/views/SellPlaces.dart';
+import 'package:WINP/GetX/views/comp.dart';
+
 import 'GetX/views/DailySell.dart';
 import 'GetX/views/whatYouSell.dart';
 
@@ -21,10 +24,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    // Get.put(DBCont(), tag: 'database');
     Get.put(MyInfo(), tag: 'MyInfo');
     Get.put(MyTabController(), tag: 'controller');
     return GetMaterialApp(
+      textDirection: TextDirection.rtl,
       initialRoute: '/',
       home: MainScreen(myInfo: myInfo),
     );
@@ -112,6 +115,79 @@ class MainScreen extends StatelessWidget {
     final MyTabController tabBarCont = Get.find(tag: 'controller');
 
     return Scaffold(
+      drawer: Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(''),
+            ),
+            ListTile(
+              title: Text(
+                'مسح كل ال داتا',
+                style: ArabicStyle(),
+                textAlign: TextAlign.center,
+              ),
+              onTap: () {
+                Get.defaultDialog(
+                    middleText: "مسح كل البيانات ؟ ",
+                    middleTextStyle: ArabicStyle(),
+                    cancel: ElevatedButton(
+                        style: ElevatedButton.styleFrom(),
+                        onPressed: () async {
+                          Get.back();
+                        },
+                        child: Text(
+                          'الغاء',
+                          style: ArabicStyle(),
+                        )),
+                    confirm: ElevatedButton(
+                        style: ElevatedButton.styleFrom(primary: Colors.red),
+                        onPressed: () async {
+                          await DBItem.deleteAll();
+                          await DBShopItemsList.deleteAll();
+                          await DBDailySell.deleteAll();
+                          Get.back();
+                        },
+                        child: Text(
+                          'موافق',
+                          style: ArabicStyle(),
+                        )));
+              },
+            ),
+            ListTile(
+              title: Text(
+                'About',
+                style: ArabicStyle(),
+                textAlign: TextAlign.center,
+              ),
+              onTap: () {
+                Get.defaultDialog(
+                    title: 'About',
+                    titleStyle: ArabicStyle(),
+                    middleText: '❤️ Made With \n ODACODE',
+                    content: Column(
+                      children: [
+                        Text(
+                          '❤️ Made With',
+                          style: ArabicStyle(),
+                        ),
+                        Text('ODACODE',
+                            style: ArabicStyle(weight: FontWeight.bold)),
+                      ],
+                    ));
+              },
+            ),
+          ],
+        ),
+      ),
       backgroundColor: (myInfo.isDark)
           ? const Color.fromARGB(255, 175, 171, 165)
           : const Color.fromARGB(255, 255, 255, 255),
@@ -235,22 +311,6 @@ class MainScreen extends StatelessWidget {
                         weight: FontWeight.w700)),
               ),
             ),
-            ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.all(50),
-                  primary: const Color.fromARGB(0, 253, 253, 253),
-                  shadowColor: const Color.fromARGB(0, 253, 253, 253),
-                  shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(50))),
-                ),
-                onPressed: () {
-                  Get.to(() => const DB_test());
-                },
-                child: Text('Test',
-                    style: ArabicStyle(
-                        fontSize: 50 * _media.textScaleFactor,
-                        color: const Color.fromARGB(255, 14, 95, 175),
-                        weight: FontWeight.w700)))
           ],
         ),
       ),
@@ -261,7 +321,3 @@ class MainScreen extends StatelessWidget {
 ////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
 
-
-//TODO: make Edit Shop Item Screen
-//TODO: make Daily Screen
-//TODO: Dialog shel w add ShopItem 

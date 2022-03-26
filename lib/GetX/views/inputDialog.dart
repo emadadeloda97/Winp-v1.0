@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:oda_tables/GetX/models/database_entity.dart';
-import 'package:oda_tables/GetX/views/SellPlaces.dart';
-import 'package:oda_tables/GetX/views/comp.dart';
-import 'package:path/path.dart';
+import 'package:WINP/GetX/models/database_entity.dart';
+import 'package:WINP/GetX/views/SellPlaces.dart';
+import 'package:WINP/GetX/views/comp.dart';
+
 import '../controller/Controllers.dart';
 
 ///////////////////////////////////////////////////////////////
@@ -317,7 +317,8 @@ class InputShopScreen extends StatelessWidget {
                             value: myInfo.ItemSelectedName.value,
                             items: myInfo.ItemsNames.map(
                                 (element) => DropdownMenuItem(
-                                      child: Text(element),
+                                      child: SizedBox(
+                                          width: 100, child: Text(element)),
                                       value: element,
                                     )).toList(),
                             onChanged: (v) => myInfo.updateItemSelected(v))),
@@ -443,6 +444,50 @@ class InputDailyRecord extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           TextButton.icon(
+              label: Text('حفظ',
+                  style: ArabicStyle(
+                      fontSize: 30,
+                      color: (myInfo.isDark)
+                          ? const Color.fromARGB(255, 175, 171, 165)
+                          : const Color.fromARGB(255, 45, 70, 184),
+                      weight: FontWeight.w700)),
+              icon: Icon(
+                Icons.check_box,
+                size: 30,
+                color: (myInfo.isDark)
+                    ? const Color.fromARGB(255, 175, 171, 165)
+                    : const Color.fromARGB(255, 45, 70, 184),
+              ),
+              onPressed: () async {
+                for (var i = 0; i < myInfo.ShopsNames.length; i++) {
+                  if (myInfo.selectedItemText[i] != '') {
+                    for (var item
+                        in myInfo.selectedItemText[i].toString().split('\n')) {
+                      var amount = item.split(":")[1];
+                      var name = item.split(":")[0];
+                      var x = DBDailySell(
+                          Date: myInfo.dateSelected.value.text,
+                          ItemName: name,
+                          ShopName: myInfo.ShopsNames[i],
+                          Selld: int.parse(amount));
+                      int r = await DBDailySell.insertRow(x);
+                      if (r == 1) {
+                        TextToast.show('تم', bgc: Colors.green);
+                      } else {
+                        TextToast.show(
+                            '${item.split(":")[0]} ${myInfo.ShopsNames[i]} راجع البيانات',
+                            bgc: Colors.red);
+                      }
+                      print(x.toJSON());
+                      print(item.split(":")[0]);
+                    }
+                  }
+                  Get.back();
+                }
+                // Get.back();
+                // print(myInfo.selectedItemText);
+              }),
+          TextButton.icon(
             style: TextButton.styleFrom(padding: const EdgeInsets.all(5)),
             label: Text('الغاء',
                 style: ArabicStyle(
@@ -462,22 +507,6 @@ class InputDailyRecord extends StatelessWidget {
               Get.back();
             },
           ),
-          TextButton.icon(
-              label: Text('حفظ',
-                  style: ArabicStyle(
-                      fontSize: 30,
-                      color: (myInfo.isDark)
-                          ? const Color.fromARGB(255, 175, 171, 165)
-                          : const Color.fromARGB(255, 45, 70, 184),
-                      weight: FontWeight.w700)),
-              icon: Icon(
-                Icons.check_box,
-                size: 30,
-                color: (myInfo.isDark)
-                    ? const Color.fromARGB(255, 175, 171, 165)
-                    : const Color.fromARGB(255, 45, 70, 184),
-              ),
-              onPressed: () async {}),
         ],
       ),
     );
@@ -498,7 +527,7 @@ class InputDailyRecord extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     myInfo.updateIsExpanted(index, myInfo.ShopsNames[index],
-                        myInfo.isExpanted[index]);
+                        myInfo.isExpantedInputAmountScreen[index]);
                   },
                   child: _MyDailyInputCard(
                     index: index,
@@ -522,12 +551,13 @@ class _MyDailyInputCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController amountSelld = TextEditingController();
     return Obx(
       () => Container(
           margin: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
-            color: const Color(0xFF2196f3),
+            color: const Color.fromARGB(255, 87, 171, 240),
           ),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -540,21 +570,108 @@ class _MyDailyInputCard extends StatelessWidget {
                       myInfo.ShopsNames[index],
                       style: ArabicStyle(),
                     ),
-                    myInfo.isExpanted[index]
+                    myInfo.isExpantedInputAmountScreen[index]
                         ? const Icon(Icons.arrow_drop_up, size: 40)
                         : const Icon(Icons.arrow_drop_down, size: 40)
                   ],
                 ),
-                myInfo.isExpanted[index]
-                    ? SizedBox(
-                        height: myInfo.itemShopList.length * 50,
+                const SizedBox(
+                  height: 25,
+                ),
+                myInfo.isExpantedInputAmountScreen[index]
+                    ? Container(
+                        constraints: const BoxConstraints(
+                          maxHeight: double.infinity,
+                        ),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: myInfo.itemShopList
-                              .map((element) => Text(
-                                  '${element['ItemName']} ${element['Selled']}',
-                                  style: ArabicStyle()))
-                              .toList(),
+                          children: [
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: myInfo.itemShopList
+                                    .map((element) => Directionality(
+                                          textDirection: TextDirection.rtl,
+                                          child: InputChip(
+                                              label: Text(
+                                                '${element['ItemName']}',
+                                                style: ArabicStyle(),
+                                              ),
+                                              onPressed: () {
+                                                Get.defaultDialog(
+                                                    content: Column(
+                                                      children: [
+                                                        Text(
+                                                          element['ItemName'],
+                                                          style: ArabicStyle(),
+                                                        ),
+                                                        const SizedBox(
+                                                          height: 15,
+                                                        ),
+                                                        TextField(
+                                                          keyboardType:
+                                                              TextInputType
+                                                                  .number,
+                                                          inputFormatters: [
+                                                            FilteringTextInputFormatter
+                                                                .digitsOnly
+                                                          ],
+                                                          decoration:
+                                                              InputDecoration(
+                                                                  label: Text(
+                                                                    'الكمية',
+                                                                    style:
+                                                                        ArabicStyle(),
+                                                                  ),
+                                                                  border:
+                                                                      OutlineInputBorder()),
+                                                          controller:
+                                                              amountSelld,
+                                                        )
+                                                      ],
+                                                    ),
+                                                    onConfirm: () {
+                                                      myInfo.updateSelectedItemText(
+                                                          '${element['ItemName']}',
+                                                          amountSelld.text,
+                                                          index);
+                                                      Get.back();
+                                                      amountSelld.text = '';
+                                                    });
+                                              }),
+                                        ))
+                                    .toList(),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 25,
+                            ),
+                            Container(
+                              constraints: const BoxConstraints(
+                                maxHeight: double.infinity,
+                              ),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  color:
+                                      const Color.fromARGB(255, 194, 192, 192)),
+                              child: Text(
+                                myInfo.selectedItemText[index],
+                                style: ArabicStyle(),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            IconButton(
+                                onPressed: () {
+                                  for (var item in myInfo
+                                      .selectedItemText[index]
+                                      .split('\n')) {
+                                    print(item);
+                                  }
+                                  myInfo.removeSelectedItemText(index);
+                                },
+                                icon: const Icon(Icons.delete))
+                          ],
                         ),
                       )
                     : const SizedBox()

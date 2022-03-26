@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:oda_tables/GetX/views/EditDialog.dart';
-import 'package:oda_tables/GetX/models/database_entity.dart';
-import 'package:oda_tables/GetX/views/comp.dart';
-import 'package:oda_tables/GetX/views/removeDialog.dart';
+import 'package:WINP/GetX/views/EditDialog.dart';
+import 'package:WINP/GetX/models/database_entity.dart';
+import 'package:WINP/GetX/views/comp.dart';
+import 'package:WINP/GetX/views/removeDialog.dart';
 import '../controller/Controllers.dart';
 import 'inputDialog.dart';
 import 'moreInfoScreen.dart';
@@ -70,6 +70,26 @@ class SellPlaces extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               TextButton.icon(
+                label: Text('اضافة',
+                    style: ArabicStyle(
+                        fontSize: 30,
+                        color: (myInfo.isDark)
+                            ? const Color.fromARGB(255, 175, 171, 165)
+                            : const Color.fromARGB(255, 45, 70, 184),
+                        weight: FontWeight.w700)),
+                icon: Icon(
+                  Icons.add_circle_outline_outlined,
+                  size: 30,
+                  color: (myInfo.isDark)
+                      ? const Color.fromARGB(255, 175, 171, 165)
+                      : const Color.fromARGB(255, 45, 70, 184),
+                ),
+                onPressed: () {
+                  Get.to(() => InputShopScreen());
+                  myInfo.resetShopItemList();
+                },
+              ),
+              TextButton.icon(
                 style: TextButton.styleFrom(padding: const EdgeInsets.all(5)),
                 label: Text('حذف',
                     style: ArabicStyle(
@@ -88,26 +108,6 @@ class SellPlaces extends StatelessWidget {
                 onPressed: () async {
                   print(myInfo.ShopsNames);
                   RemoveShopDialog(myInfo.ShopsNames);
-                },
-              ),
-              TextButton.icon(
-                label: Text('اضافة',
-                    style: ArabicStyle(
-                        fontSize: 30,
-                        color: (myInfo.isDark)
-                            ? const Color.fromARGB(255, 175, 171, 165)
-                            : const Color.fromARGB(255, 45, 70, 184),
-                        weight: FontWeight.w700)),
-                icon: Icon(
-                  Icons.add_circle_outline_outlined,
-                  size: 30,
-                  color: (myInfo.isDark)
-                      ? const Color.fromARGB(255, 175, 171, 165)
-                      : const Color.fromARGB(255, 45, 70, 184),
-                ),
-                onPressed: () {
-                  Get.to(() => InputShopScreen());
-                  myInfo.resetShopItemList();
                 },
               ),
             ],

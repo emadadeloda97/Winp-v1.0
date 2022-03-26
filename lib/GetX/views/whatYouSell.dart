@@ -2,13 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:oda_tables/GetX/controller/Controllers.dart';
-
-import 'package:oda_tables/GetX/models/database_entity.dart';
-import 'package:oda_tables/GetX/views/comp.dart';
-import 'package:oda_tables/GetX/views/inputDialog.dart';
-import 'package:oda_tables/GetX/views/removeDialog.dart';
-
+import 'package:WINP/GetX/controller/Controllers.dart';
+import 'package:WINP/GetX/models/database_entity.dart';
+import 'package:WINP/GetX/views/comp.dart';
+import 'package:WINP/GetX/views/inputDialog.dart';
+import 'package:WINP/GetX/views/removeDialog.dart';
 import 'EditDialog.dart';
 import 'moreInfoScreen.dart';
 
@@ -72,6 +70,25 @@ class WhatYouSell extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             TextButton.icon(
+              icon: Icon(
+                Icons.add_circle_outline_outlined,
+                size: 30,
+                color: (myInfo.isDark)
+                    ? const Color.fromARGB(255, 175, 171, 165)
+                    : const Color.fromARGB(255, 45, 70, 184),
+              ),
+              onPressed: () {
+                InputItemDialog();
+              },
+              label: Text('اضافة',
+                  style: ArabicStyle(
+                      fontSize: 30,
+                      color: (myInfo.isDark)
+                          ? const Color.fromARGB(255, 175, 171, 165)
+                          : const Color.fromARGB(255, 45, 70, 184),
+                      weight: FontWeight.w700)),
+            ),
+            TextButton.icon(
               style: TextButton.styleFrom(padding: const EdgeInsets.all(5)),
               onPressed: () {
                 RemoveItemDialog();
@@ -84,25 +101,6 @@ class WhatYouSell extends StatelessWidget {
                     : const Color.fromARGB(255, 45, 70, 184),
               ),
               label: Text('حذف',
-                  style: ArabicStyle(
-                      fontSize: 30,
-                      color: (myInfo.isDark)
-                          ? const Color.fromARGB(255, 175, 171, 165)
-                          : const Color.fromARGB(255, 45, 70, 184),
-                      weight: FontWeight.w700)),
-            ),
-            TextButton.icon(
-              icon: Icon(
-                Icons.add_circle_outline_outlined,
-                size: 30,
-                color: (myInfo.isDark)
-                    ? const Color.fromARGB(255, 175, 171, 165)
-                    : const Color.fromARGB(255, 45, 70, 184),
-              ),
-              onPressed: () {
-                InputItemDialog();
-              },
-              label: Text('اضافة',
                   style: ArabicStyle(
                       fontSize: 30,
                       color: (myInfo.isDark)

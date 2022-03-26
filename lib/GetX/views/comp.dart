@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:oda_tables/GetX/controller/Controllers.dart';
+import 'package:WINP/GetX/controller/Controllers.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'package:oda_tables/GetX/views/SellPlaces.dart';
+import 'package:WINP/GetX/views/SellPlaces.dart';
 
 TextStyle ArabicStyle({double? fontSize, weight, Color? color}) {
   return TextStyle(

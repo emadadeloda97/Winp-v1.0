@@ -1,10 +1,8 @@
 // ignore_for_file: camel_case_types, avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:oda_tables/GetX/models/database_entity.dart';
-import 'package:oda_tables/GetX/models/database_helper.dart';
-import 'package:restart_app/restart_app.dart';
+
+import 'package:WINP/GetX/models/database_helper.dart';
 
 class DB_test extends StatefulWidget {
   const DB_test({Key? key}) : super(key: key);

@@ -1,11 +1,8 @@
-// ignore_for_file: file_names, non_constant_identifier_names, empty_catches, avoid_print, avoid_types_as_parameter_names
-
+import 'package:WINP/GetX/models/database_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
-import 'package:intl/intl.dart';
 
-import 'package:oda_tables/GetX/models/database_entity.dart';
+import 'package:intl/intl.dart';
 
 import '../views/comp.dart';
 
@@ -110,16 +107,22 @@ class MyInfo extends GetxController {
 
 /* Daily Controller */
 
-  RxList dailyRecord = [].obs;
+  RxMap dailyRecord = {}.obs;
   Rx<TextEditingController> dateSelected = TextEditingController().obs;
-  RxList isExpanted = [].obs;
+  RxList isExpantedInputAmountScreen = [].obs;
+  RxList isExpantedDailyRecord = [].obs;
   RxList itemShopList = [].obs;
+  RxList selectedItemText = [].obs;
 
   void setDailyRecords() async {
-    dailyRecord.value = await DBDailySell.readAll();
+    dailyRecord.value = await DBDailySell.readByDate();
     dateSelected.value.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     // isExpanted.value = false;
-    isExpanted.value = ShopsNames.map((element) => false).toList();
+    isExpantedInputAmountScreen.value =
+        ShopsNames.map((element) => false).toList();
+    isExpantedDailyRecord.value =
+        dailyRecord.keys.toList().map((element) => false).toList();
+    selectedItemText.value = ShopsNames.map((element) => '').toList();
   }
 
   void updateDateSelected(newDate) {
@@ -127,14 +130,41 @@ class MyInfo extends GetxController {
     dateSelected.value.text = n;
   }
 
+  void updateIsExpantedDailyRecord(index, isbool) async {
+    if (isbool) {
+      isExpantedDailyRecord.value =
+          dailyRecord.keys.toList().map((element) => false).toList();
+    } else {
+      isExpantedDailyRecord.value =
+          dailyRecord.keys.toList().map((element) => false).toList();
+      isExpantedDailyRecord[index] = true;
+    }
+  }
+
   void updateIsExpanted(index, shopName, isbool) async {
     if (isbool) {
-      isExpanted.value = ShopsNames.map((element) => false).toList();
+      isExpantedInputAmountScreen.value =
+          ShopsNames.map((element) => false).toList();
     } else {
-      isExpanted.value = ShopsNames.map((element) => false).toList();
-      isExpanted[index] = true;
+      isExpantedInputAmountScreen.value =
+          ShopsNames.map((element) => false).toList();
+      isExpantedInputAmountScreen[index] = true;
       itemShopList.value = await DBShopItemsList.readByShop(shopName);
     }
+  }
+
+  updateSelectedItemText(String name, String amount, int index) {
+    if (amount != '') {
+      if (selectedItemText[index] == '') {
+        selectedItemText[index] += name + ':' + amount;
+      } else {
+        selectedItemText[index] += "\n" + name + ':' + amount;
+      }
+    }
+  }
+
+  removeSelectedItemText(index) {
+    selectedItemText[index] = '';
   }
 
 /* */

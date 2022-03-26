@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:oda_tables/GetX/controller/Controllers.dart';
-import 'package:oda_tables/GetX/models/database_entity.dart';
-import 'package:oda_tables/GetX/views/comp.dart';
+import 'package:WINP/GetX/controller/Controllers.dart';
+import 'package:WINP/GetX/models/database_entity.dart';
+import 'package:WINP/GetX/views/comp.dart';
 
 ////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////
